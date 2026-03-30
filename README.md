@@ -20,38 +20,56 @@ In this sprint, the focus was on developing the core system functionality, inclu
 
 ✅ Features Implemented
 🔹 Task Management Module
+
 Create Tasks (Admin)
 View Tasks (User & Admin)
 Edit Tasks (Admin)
 Delete Tasks (Admin)
+
 🔹 User Task Interaction
+
 Users can view assigned tasks
 Users can submit their tasks
+
 🔹 Dashboard
+
 Admin Dashboard to manage tasks
 User Dashboard to view task status
+
 🔹 Authentication Integration
+
 Secure routes using JWT authentication
 Only authorized users can access features
+
 🔹 Backend Development
+
 Built REST APIs using Node.js and Express
 Implemented CRUD operations for tasks
+
 🔹 Database Integration
+
 Connected MongoDB using Mongoose
 Created models for Users and Tasks
+
 🛠️ Tech Stack
+
 Frontend:
 React.js
+
 Backend:
 Node.js
 Express.js
+
 Database:
 MongoDB
+
 🔗 Key Functionalities
+
 Full CRUD operations for Task Management
 Role-based access (Admin/User – partially implemented)
 Frontend and Backend integration
 Real-time task handling
+
 📂 Project Structure
 
 /client → React Frontend
