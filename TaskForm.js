@@ -26,7 +26,7 @@ function TaskForm({ initialTask = null, isEditing = false, onCancel, onSave, use
       description: initialTask.description || '',
       dueDate: dueDateValue,
       status: initialTask.status || 'Pending',
-      assignedTo: initialTask.assignedTo || '',
+      assignedTo: initialTask?.assignedTo?._id || initialTask?.assignedTo || '',
     });
   }, [initialTask]);
 
