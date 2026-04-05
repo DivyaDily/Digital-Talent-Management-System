@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import TaskForm from './TaskForm';
 import TaskCard from './TaskCard';
+import StatsBar from './StatsBar';
 import './App.css';
 
 const API_BASE = 'http://localhost:5000';
@@ -38,6 +39,8 @@ function Dashboard({ onLogout }) {
   const [error, setError] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [stats, setStats] = useState({ totalTasks: 0, completedTasks: 0, pendingTasks: 0, completionRate: 0, userStats: [] });
+  const [statsLoading, setStatsLoading] = useState(true);
 
   const isAdmin = userInfo?.role === 'Admin';
 
@@ -60,6 +63,35 @@ function Dashboard({ onLogout }) {
     return { Authorization: `Bearer ${token}` };
   }, [token]);
 
+  const taskStats = useMemo(() => {
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter((t) => t.status === 'Completed').length;
+    const pendingTasks = totalTasks - completedTasks;
+    const completionRate = totalTasks > 0 ? Number(((completedTasks / totalTasks) * 100).toFixed(2)) : 0;
+
+    return {
+      totalTasks,
+      completedTasks,
+      pendingTasks,
+      completionRate,
+      userStats: stats.userStats,
+    };
+  }, [tasks, stats.userStats]);
+
+  const fetchStats = async () => {
+    setStatsLoading(true);
+    try {
+      const res = await axios.get(`${API_BASE}/api/tasks/stats`, { headers: authHeader });
+      if (res.data?.success && res.data?.data) {
+        setStats(res.data.data);
+      }
+    } catch (err) {
+      console.error('Fetch stats error:', err);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
   const refreshTasks = async () => {
     const res = await axios.get(`${API_BASE}/api/tasks`, { headers: authHeader });
     return res.data?.data || [];
@@ -78,6 +110,8 @@ function Dashboard({ onLogout }) {
 
         const loadedTasks = await refreshTasks();
         setTasks(loadedTasks);
+
+        await fetchStats();
 
         if (isAdmin) {
           const usersRes = await axios.get(`${API_BASE}/api/users`, { headers: authHeader });
@@ -170,7 +204,7 @@ function Dashboard({ onLogout }) {
 
       const loadedTasks = await refreshTasks();
       setTasks(loadedTasks);
-      setSuccessMessage('Congratulations! You have completed the task with extra toppings! 🍕✨');
+      setSuccessMessage('Congratulations! You have completed the task! 🍕✨');
       setShowSuccessModal(true);
     } catch (err) {
       console.error('Mark completed error:', err);
@@ -206,6 +240,8 @@ function Dashboard({ onLogout }) {
             {isAdmin ? 'Create, edit, and manage tasks in a grid view.' : 'Review tasks assigned to you and mark them completed.'}
           </p>
         </div>
+
+        {isAdmin && <StatsBar stats={taskStats} loading={loading || statsLoading} />}
 
         {error && <div className="error-state">{error}</div>}
         {showSuccessModal && (
