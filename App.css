@@ -357,6 +357,141 @@ body {
   color: #b00020;
 }
 
+/* Analytics (Admin) */
+.stats-ribbon {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.2fr;
+  gap: 16px;
+}
+
+.stats-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+.stats-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.stats-card__header h3 {
+  font-size: 1.05rem;
+  font-weight: 950;
+  color: var(--primary);
+}
+
+.stats-card__sub {
+  font-weight: 900;
+  color: var(--muted);
+}
+
+.stats-card__value {
+  font-size: 2rem;
+  font-weight: 950;
+  color: var(--primary);
+  line-height: 1.1;
+}
+
+.stats-card__hint {
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.stats-card__meta {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.ring-holder {
+  display: grid;
+  place-items: center;
+  padding: 8px 0;
+}
+
+.ring-loading {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.progress-ring-svg {
+  display: block;
+}
+
+.progress-ring-track {
+  stroke: rgba(0, 42, 92, 0.12);
+}
+
+.progress-ring-circle {
+  stroke: var(--accent);
+  transition: stroke-dashoffset 300ms ease;
+}
+
+.progress-ring-text {
+  font-weight: 950;
+  fill: var(--primary);
+  font-size: 18px;
+}
+
+.user-analytics-empty {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.top-users {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.top-users__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.top-users__name {
+  font-weight: 950;
+  color: var(--primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.top-users__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+  color: var(--muted);
+}
+
+.top-users__rate {
+  color: #7a4b00;
+  background: rgba(249, 166, 2, 0.18);
+  border: 1px solid rgba(249, 166, 2, 0.35);
+  border-radius: 999px;
+  padding: 4px 8px;
+}
+
+.top-users__counts {
+  color: var(--muted);
+}
+
 .modal-overlay {
   position: fixed;
   z-index: 1000;
@@ -679,6 +814,10 @@ body {
   }
 
   .task-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-ribbon {
     grid-template-columns: 1fr;
   }
 }
