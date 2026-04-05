@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import TaskForm from './TaskForm';
 import TaskCard from './TaskCard';
+import StatsBar from './StatsBar';
 import './App.css';
 
 const API_BASE = 'http://localhost:5000';
@@ -36,11 +37,41 @@ function AdminDashboard({ onLogout }) {
   const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [tasks, setTasks] = useState([]);
+  const [users, setUsers] = useState([]);
   const [editingTask, setEditingTask] = useState(null);
+  const [stats, setStats] = useState({ totalTasks: 0, completedTasks: 0, pendingTasks: 0, completionRate: 0, userStats: [] });
+  const [statsLoading, setStatsLoading] = useState(true);
 
   const isAdmin = userInfo?.role === 'Admin';
 
   const api = useAuthorizedApi(token);
+
+  const fetchStats = async () => {
+    if (!isAdmin) return;
+    try {
+      setStatsLoading(true);
+      const res = await api.get('/api/tasks/stats');
+      const data = res?.data?.data;
+      if (res?.data?.success && data) {
+        setStats({
+          totalTasks: data.totalTasks ?? 0,
+          completedTasks: data.completedTasks ?? 0,
+          pendingTasks: data.pendingTasks ?? 0,
+          completionRate: data.completionRate ?? 0,
+          userStats: Array.isArray(data.userStats) ? data.userStats : [],
+        });
+      } else {
+        console.error('Unexpected stats payload', res);
+      }
+    } catch (err) {
+      console.error('Fetch stats error:', err);
+      if (err?.response?.status === 401) {
+        onLogout?.();
+      }
+    } finally {
+      setStatsLoading(false);
+    }
+  };
 
   useEffect(() => {
     try {
@@ -62,13 +93,24 @@ function AdminDashboard({ onLogout }) {
     return res.data?.data || [];
   };
 
+  const refreshUsers = async () => {
+    const res = await api.get('/api/users');
+    return res.data?.data || [];
+  };
+
   useEffect(() => {
     const load = async () => {
       try {
         setLoading(true);
-        if (!isAdmin) return;
+        if (!isAdmin) {
+          setLoading(false);
+          return;
+        }
+        const loadedUsers = await refreshUsers();
+        setUsers(loadedUsers);
         const loadedTasks = await refreshTasks();
         setTasks(loadedTasks);
+        await fetchStats();
       } catch (err) {
         console.error('Admin dashboard load error:', err);
         if (err?.response?.status === 401) onLogout?.();
@@ -90,14 +132,17 @@ function AdminDashboard({ onLogout }) {
   const handleSaveTask = async (payload) => {
     try {
       if (editingTask?._id) {
-        await api.put('/api/tasks', { id: editingTask._id, ...payload });
+        await api.put(`/api/tasks/${editingTask._id}`, payload);
       } else {
         await api.post('/api/tasks', payload);
       }
 
       setEditingTask(null);
+      const loadedUsers = await refreshUsers();
+      setUsers(loadedUsers);
       const loadedTasks = await refreshTasks();
       setTasks(loadedTasks);
+      await fetchStats();
     } catch (err) {
       console.error('Save task error:', err);
       alert(err?.response?.data?.message || 'Failed to save task');
@@ -114,9 +159,12 @@ function AdminDashboard({ onLogout }) {
     if (!ok) return;
 
     try {
-      await api.delete('/api/tasks', { data: { id: taskId } });
+      await api.delete(`/api/tasks/${taskId}`);
+      const loadedUsers = await refreshUsers();
+      setUsers(loadedUsers);
       const loadedTasks = await refreshTasks();
       setTasks(loadedTasks);
+      await fetchStats();
     } catch (err) {
       console.error('Delete task error:', err);
       alert(err?.response?.data?.message || 'Failed to delete task');
@@ -126,9 +174,10 @@ function AdminDashboard({ onLogout }) {
   const handleStatusChange = async (taskId, nextStatus) => {
     if (!taskId) return;
     try {
-      await api.put('/api/tasks', { id: taskId, status: nextStatus });
+      await api.put(`/api/tasks/${taskId}`, { status: nextStatus });
       const loadedTasks = await refreshTasks();
       setTasks(loadedTasks);
+      await fetchStats();
     } catch (err) {
       console.error('Status update error:', err);
       alert(err?.response?.data?.message || 'Failed to update task status');
@@ -170,12 +219,14 @@ function AdminDashboard({ onLogout }) {
           <div className="empty-state">Access denied. Admins only.</div>
         ) : (
           <>
+            <StatsBar stats={stats} loading={statsLoading} />
             <section className="dashboard-section">
               <div className="section-title-row">
                 <h2 className="section-title">{editingTask ? 'Edit sprint' : 'Add sprint milestone'}</h2>
               </div>
 
               <TaskForm
+                users={users}
                 initialTask={editingTask}
                 isEditing={!!editingTask}
                 onCancel={() => setEditingTask(null)}
