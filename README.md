@@ -85,3 +85,79 @@ Successfully developed the core working system where:
 Admin can manage tasks
 Users can interact with tasks
 Dashboard displays task-related data.
+
+## 🚀 Digital Talent Management System – Sprint 3 Completed
+
+Continuing from Sprint 1 (Authentication) and Sprint 2 (Core Task Management), Sprint 3 focuses on implementing advanced features, improving system control, and adding analytics.
+
+---
+
+### ✅ Sprint 3 – Advanced Features & Optimization
+
+🔐 Role-Based Access Control (RBAC)
+- Implemented Admin and User roles
+- Protected routes using existing authentication middleware
+- Restricted admin-only features securely
+
+📌 Task Status Tracking
+- Added task status: Pending, In Progress, Completed
+- Enabled status updates for better task lifecycle management
+- Integrated seamlessly with existing task module
+
+📊 Basic Analytics (Admin Dashboard)
+- Created protected API endpoint: `GET /api/tasks/stats`
+- Calculated:
+  - Total tasks
+  - Completed tasks
+  - Pending tasks
+  - Completion rate (%)
+
+👥 User-wise Analytics
+- Task count per user
+- Completed tasks per user
+- Identified top-performing users
+
+💻 Frontend Enhancements
+- Integrated analytics into Admin Dashboard
+- Added Stats section:
+  - Task counts
+  - Completion rate visualization
+  - User performance insights
+- Enabled auto-refresh after task operations
+
+🎨 UI Improvements
+- Clean and responsive design
+- Modern dashboard layout
+- Consistent UI with previous sprints
+
+---
+
+### ⚙️ Tech Stack
+- Frontend: React.js
+- Backend: Node.js, Express.js
+- Database: MongoDB
+- Authentication: JWT
+
+---
+
+### 🔒 Important Notes
+- No existing functionality was modified or broken
+- Authentication and task management remain stable
+- Code follows modular and scalable structure
+
+---
+
+### 📈 Progress Summary
+- ✅ Sprint 1: Authentication & Setup
+- ✅ Sprint 2: Task Management System
+- ✅ Sprint 3: Advanced Features & Analytics
+- ⏳ Sprint 4: Deployment (Next Phase)
+
+---
+
+### 🎯 Outcome
+Successfully enhanced the application with secure role-based access, structured task tracking, and meaningful analytics for admin insights.
+
+---
+
+🔜 Next Step: Deployment & Production Release (Sprint 4)
