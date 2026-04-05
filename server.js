@@ -152,6 +152,94 @@ app.get('/api/tasks', requireAuth, async (req, res) => {
     }
 });
 
+app.get('/api/tasks/stats', requireAuth, requireAdmin, async (req, res) => {
+    try {
+        const totalTasks = await Task.countDocuments();
+        const completedTasks = await Task.countDocuments({ status: 'Completed' });
+        const pendingTasks = await Task.countDocuments({ status: { $ne: 'Completed' } });
+        const completionRate = totalTasks > 0 ? Number(((completedTasks / totalTasks) * 100).toFixed(2)) : 0;
+
+        const usersStats = await Task.aggregate([
+            {
+                $match: { assignedTo: { $ne: null } }
+            },
+            {
+                $group: {
+                    _id: '$assignedTo',
+                    totalTasks: { $sum: 1 },
+                    completedTasks: {
+                        $sum: {
+                            $cond: [{ $eq: ['$status', 'Completed'] }, 1, 0]
+                        }
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    completionRate: {
+                        $cond: [
+                            { $gt: ['$totalTasks', 0] },
+                            { $round: [{ $multiply: [{ $divide: ['$completedTasks', '$totalTasks'] }, 100] }, 2] },
+                            0
+                        ]
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'userInfo'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$userInfo',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $project: {
+                    userId: '$_id',
+                    username: { $ifNull: ['$userInfo.name', 'Unknown'] },
+                    totalTasks: 1,
+                    completedTasks: 1,
+                    completionRate: 1
+                }
+            },
+            // Only include users who have completed 100% of their assigned tasks
+            {
+                $match: {
+                    $expr: {
+                        $eq: ['$completedTasks', '$totalTasks']
+                    }
+                }
+            },
+            {
+                $sort: { totalTasks: -1 }
+            },
+            {
+                $limit: 5
+            }
+        ]);
+
+        res.json({
+            success: true,
+            data: {
+                totalTasks,
+                completedTasks,
+                pendingTasks,
+                completionRate,
+                userStats: usersStats,
+            },
+        });
+    } catch (error) {
+        console.error('Get task stats error:', error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
 app.post('/api/tasks', requireAuth, requireAdmin, async (req, res) => {
     console.log('POST /api/tasks called');
     try {
